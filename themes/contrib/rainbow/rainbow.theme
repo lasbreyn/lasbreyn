@@ -1,0 +1,348 @@
+<?php
+/**
+ * @files
+ * Contains functions to support the rainbow theme
+ */
+
+define('THEME_PATH', base_path() . drupal_get_path('theme', 'rainbow'));
+
+use Drupal\Core\Template\RenderWrapper;
+use Drupal\Core\Template\Attribute;
+use Drupal\Component\Utility\SafeMarkup;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\system\Form\ThemeSettingsForm;
+use Drupal\file\Entity\File;
+use Drupal\Core\Url;
+use Drupal\file\Plugin\Core\Entity\FileInterface;
+
+
+/**
+ * Implements hook_preprocess_HOOK() for Page document templates.
+ */
+function rainbow_preprocess_page(array &$variables){
+  
+  if (!empty($variables['page']['sidebar_first']) && !empty($variables['page']['sidebar_second'])) {
+    $variables['attributes']['class'][] = 'layout-two-sidebars';
+    $variables['page']['main_content_width'] = 6;    
+  }
+  elseif (!empty($variables['page']['sidebar_first'])) {
+    $variables['attributes']['class'][] = 'layout-one-sidebar';
+    $variables['attributes']['class'][] = 'layout-sidebar-first';
+    $variables['page']['main_content_width'] = 9;    
+  }
+  elseif (!empty($variables['page']['sidebar_second'])) {
+    $variables['attributes']['class'][] = 'layout-one-sidebar';
+    $variables['attributes']['class'][] = 'layout-sidebar-second';
+    $variables['page']['main_content_width'] = 9;    
+  }
+  else {
+    $variables['attributes']['class'][] = 'layout-no-sidebars';
+    $variables['page']['main_content_width'] = 12;    
+  }
+  
+  $slider_contents = array();
+  $resp_contents = array();
+  
+  // Slider block contents
+  $slider_contents = _rainbow_get_home_block_contents('slider');
+
+  //Responsive Layout block contents
+  $resp_contents['imac'] = _rainbow_get_home_block_contents('imac');
+  $resp_contents['ipad'] = _rainbow_get_home_block_contents('ipad');
+  $resp_contents['iphone'] = _rainbow_get_home_block_contents('iphone');
+
+  $variables['base_path'] = base_path();  
+  $variables['slider_contents'] = $slider_contents;
+  $variables['resp_contents'] = $resp_contents;
+  $variables['chart_image'] = THEME_PATH . '/placeholders/homepage/browser_screenshot.png';
+  $variables['chart_data'] = '<h2>Clean & elegant design.</h2>
+                              <p>User friendly design focused on making your message clear. High readability and proffesional feel.</p>';
+  $variables['icon_image'] = THEME_PATH . '/placeholders/homepage/icons.png';
+
+  //Attaching the custom style library with custom css and js files
+  $variables['#attached']['library'][] = 'rainbow/custom-styling';
+ 
+  //Styling the page content width for contact page
+  if (!empty($variables['page']['content']) && !empty($variables['page']['sidebar_second']['contactaddress'])) {
+    $variables['page']['content']['rainbow_content']['#attributes']['class'] = array('col-sm-6');
+    $variables['page']['sidebar_second']['#attributes']['class'] = array('col-sm-6');
+  }
+  elseif (!empty($variables['page']['content']) && empty($variables['page']['sidebar_second']['contactaddress'])) {
+    $variables['page']['content']['rainbow_content']['#attributes']['class'] = array('col-sm-12');
+  }
+  
+  $variables['facebook'] = empty(theme_get_setting('facebook_url')) ? '#' : theme_get_setting('facebook_url');
+  $variables['google'] = empty(theme_get_setting('google_plus_url')) ? '#' : theme_get_setting('google_plus_url');
+  $variables['twitter'] = empty(theme_get_setting('twitter_url')) ? '#' : theme_get_setting('twitter_url');
+  $variables['linkedin'] = empty(theme_get_setting('linkedin_url')) ? '#' : theme_get_setting('linkedin_url');
+  $variables['pinterest'] = empty(theme_get_setting('pinterest_url')) ? '#' : theme_get_setting('pinterest_url');
+  $variables['rss'] = empty(theme_get_setting('rss_url')) ? '#' : theme_get_setting('rss_url');
+}
+
+/**
+ * Function to get home page contents for the slider and responsive block in front page
+ */
+function _rainbow_get_home_block_contents($sec = '') {
+
+  $slider_content = array();
+    for ($i = 1; $i < 6; $i++) {
+
+      $fid = theme_get_setting('slide_image_path'.$i,'rainbow');
+
+      if (!empty($fid))
+      {
+        $file = file_load($fid[0]);
+        $uri = $file->getFileUri();
+        $path = file_create_url($uri);
+      }
+      else {
+
+        $path = base_path().drupal_get_path('theme', 'rainbow').theme_get_setting('slide_image_path_'.$i,'rainbow');
+      }
+  
+     
+     $active_class = $i == 1 ? 'active' : 'in-active';
+     $slider_content[$i] = '<div class="item ' . $active_class . ' demo-text-goes-top">
+      <div class="content-wrapper">
+        <div class="slide-body blue-container">
+          <h2>'.wordwrap(theme_get_setting('slide_title_'.$i,'rainbow'),50,"<br>").'.</h2>
+          <p>'.wordwrap(theme_get_setting('slide_description_'.$i,'rainbow'), 60, "<br>").'</p>
+          <div class="demo-devices">
+            <div class="ipad">
+              <div class="content">
+                <img src='.$path.' class="retina" width="181" height="241">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>';
+      }
+
+ 
+  $image_list = array();
+  switch ($sec) {
+    case 'slider':
+      $image_list = $slider_content;
+      break;
+    case 'imac':
+      $image_list = array(
+        0 => THEME_PATH . '/placeholders/screenshots/ss_1.png',
+        1 => THEME_PATH . '/placeholders/screenshots/ss_2.png',
+      );
+      break;
+    case 'ipad':
+      $image_list = array(
+        0 => THEME_PATH . '/placeholders/screenshots/ss_tablet_1.png',
+        1 => THEME_PATH . '/placeholders/screenshots/ss_tablet_2.png',
+      );
+      break;
+    case 'iphone':
+      $image_list = array(
+        0 => THEME_PATH . '/placeholders/screenshots/ss_mobile_1.png',
+        1 => THEME_PATH . '/placeholders/screenshots/ss_mobile_2.png',
+      );
+      break;
+  }
+  return $image_list;
+}
+
+/**
+ * Implementation of HOOK_preprocess_menu to inject the images & class attributes to the menu title
+ */
+function rainbow_preprocess_menu(&$variables) {
+  if ($variables['theme_hook_original'] == 'menu__main') {
+    foreach ($variables['items'] as &$menu_link) {
+      if ($menu_link['title'] == 'Home') {
+        $menu_link['title'] =  "<img src='" . THEME_PATH . '/flat-icons/home.png' . "'  height='60' weight='60' /> " . $menu_link['title'];
+      }
+      else if ($menu_link['title'] == 'Blog') {
+        $menu_link['title'] =  "<img src='" . THEME_PATH . '/flat-icons/letter-symbol.png' . "'  height='60' weight='60' /> " . $menu_link['title'];
+      }
+      else if ($menu_link['title'] == 'Contact') {
+        $menu_link['title'] =  "<img src='" . THEME_PATH . '/flat-icons/mail.png' . "'  height='60' weight='60' /> " . $menu_link['title'];
+      }
+      else {
+        $menu_link['title'] =  "<img src='" . THEME_PATH . '/flat-icons/noImage.jpg' . "'  height='60' weight='60' /> " . $menu_link['title'];
+      }
+    }
+  }
+}
+
+/**
+ * Implementation of hook_form_alter()
+ */
+function rainbow_form_alter(&$form, &$form_state, &$form_id) {
+  if ($form_id == 'user_login_form') {
+    $form['#attributes']['class'] = array('form-horizontal');
+      
+    $form['name']['#title'] = "Email";
+    $form['name']['#attributes'] = array('placeholder' => "Email");
+    $form['name']['#attributes']['class'] = array('form-control');
+    
+    $form['pass']['#attributes'] = array('placeholder' => "Password");
+    $form['pass']['#attributes']['class'] = array('form-control');
+
+    $form['actions']['submit']['#attributes']['class'] = array('btn', 'btn-primary');
+    $form['actions']['submit']['#prefix'] = '<div class="modal-footer col-lg-offset-6">';
+    $form['actions']['submit']['#suffix'] ='</div><!-- /.modal-footer -->';
+  }
+  elseif ($form_id == 'contact_message_feedback_form') {
+    $form['name']['#attributes'] = array('placeholder' => "John Doe");
+    $form['name']['#attributes']['class'] = array('form-control');
+    $form['name']['#prefix'] = '<div class="legend"> Contact Us </div>';
+
+    $form['mail']['#attributes'] = array('placeholder' => "email@example.com");
+    $form['mail']['#attributes']['class'] = array('form-control');
+   
+    $form['subject']['widget'][0]['value']['#attributes'] = array('placeholder' => "Your subject..");
+    $form['subject']['widget'][0]['value']['#attributes']['class'][] = 'form-control';
+
+    $form['message']['widget'][0]['value']['#attributes'] = array('placeholder' => "Your message here..");
+    $form['message']['widget'][0]['value']['#attributes']['class'][] = 'form-control';
+    
+    $form['actions']['submit']['#attributes']['class'] = array('btn', 'btn-primary');
+    $form['actions']['preview']['#attributes']['class'] = array('btn', 'btn-default');
+  }
+}
+
+/**
+ * Implementation of hook_preprocess_menu_local_task
+ */
+function rainbow_preprocess_menu_local_task(&$variables) {
+  $link = $variables['element']['#link'];
+  $link += array(
+    'localized_options' => array(),
+  );
+  $link_text = $link['title'];
+
+  if (!empty($variables['element']['#active'])) {
+    $variables['is_active'] = TRUE;
+
+    // Add text to indicate active tab for non-visual users.
+    $active = SafeMarkup::format('<span class="visually-hidden">@label</span>', array('@label' => t('(active tab)')));
+    $link_text = t('@local-task-title@active', array('@local-task-title' => $link_text, '@active' => $active));
+  }
+
+  $link['localized_options']['set_active_class'] = TRUE;
+  $link['localized_options']['attributes'] = array('title' => $link['title'], 'data-hover' => $link['title']);
+
+  $variables['link'] = array(
+    '#type' => 'link',
+    '#title' => $link_text,
+    '#url' => $link['url'],
+    '#options' => $link['localized_options'],
+  );
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function rainbow_form_system_theme_settings_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state) {
+  $form['rainbow_settings'] = array(
+    '#type' => 'details',
+    '#title' => t('rainbow Settings'),
+    '#collapsible' => FALSE,
+    '#collapsed' => FALSE,
+  );
+  //Slider settings
+  $form['rainbow_settings']['slideshow'] = array(
+    '#type' => 'details',
+    '#title' => t('Front Page Slideshow'),
+    '#collapsible' => TRUE,
+    '#collapsed' => FALSE,
+  );
+  $form['rainbow_settings']['slideshow']['slideshow_display'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Show slideshow'),
+    '#default_value' => theme_get_setting('slideshow_display'),
+    '#description'   => t("Check this option to show Slideshow in front page. Uncheck to hide."),
+  );
+  $form['rainbow_settings']['slideshow']['slide'] = array(
+    '#markup' => t('You can change the description and URL of each slide in the following Slide Setting fieldsets.'),
+  );
+  
+  for ($i = 1; $i < 6; $i++) {
+    $form['rainbow_settings']['slideshow']['slide' . $i] = array(
+      '#type' => 'details',
+      '#title' => t('Slide '.$i),
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+    );
+    $form['rainbow_settings']['slideshow']['slide' . $i]['slide_title_' . $i] = array(
+      '#type' => 'textfield',
+      '#title' => t('Slide '.$i.' Title'),
+      '#default_value' => theme_get_setting('slide_title_' . $i,'rainbow'),
+    );
+    $form['rainbow_settings']['slideshow']['slide' . $i]['slide_description_' . $i] = array(
+      '#type' => 'textarea',
+      '#title' => t('Slide '.$i.' Description'),
+      '#default_value' => theme_get_setting('slide_description_' . $i,'rainbow'),
+    );
+    $form['rainbow_settings']['slideshow']['slide' . $i]['slide_image_' . $i] = array(
+      '#type' => 'managed_file',
+      '#title' => t('Slide '.$i.' Image'),
+      '#default_value' => theme_get_setting('slide_image_' . $i,'rainbow'),
+      '#upload_location' => 'public://',
+    );
+  }
+
+  //Social Icon Link
+  $form['rainbow_settings']['social_icon'] = array(
+    '#type' => 'details',
+    '#title' => t('Social Icon Link'),
+    '#collapsible' => TRUE,
+    '#collapsed' => FALSE,
+  );
+  $form['rainbow_settings']['social_icon']['facebook_url'] = array(
+    '#type' => 'textfield',
+    '#title' => t('FaceBook Link'),
+    '#default_value' => theme_get_setting('facebook_url'),
+  );
+  $form['rainbow_settings']['social_icon']['google_plus_url'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Google plus Link'),
+    '#default_value' => theme_get_setting('google_plus_url'),
+  );
+  $form['rainbow_settings']['social_icon']['twitter_url'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Twitter Link'),
+    '#default_value' => theme_get_setting('twitter_url'),
+  );
+  $form['rainbow_settings']['social_icon']['linkedin_url'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Linkedin Link'),
+    '#default_value' => theme_get_setting('linkedin_url'),
+  );
+  $form['rainbow_settings']['social_icon']['pinterest_url'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Pinterest Link'),
+    '#default_value' => theme_get_setting('pinterest_url'),
+  );
+  $form['rainbow_settings']['social_icon']['rss_url'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Rss Link'),
+    '#default_value' => theme_get_setting('rss_url'),
+  );
+  // Custom submit to save the file permenant.
+  $form['#submit'][] = 'rainbow_settings_form_submit';
+}
+
+/**
+ * Custom submit handler for rainbow settings form.
+ */
+function rainbow_settings_form_submit(&$form, \Drupal\Core\Form\FormStateInterface $form_state) {
+  $account = \Drupal::currentUser();
+  $values = $form_state->getValues();
+  for ($i = 0; $i < 6; $i++) {
+    if (isset($values['slide_image_' . $i]) && !empty($values['slide_image_' . $i])) {
+      // Load the file via file.fid.
+      $file = file_load($values['slide_image_' . $i][0]);
+      // Change status to permanent.
+      $file->setPermanent();
+      $file->save();
+      $file_usage = \Drupal::service('file.usage');
+      $file_usage->add($file, 'user', 'user', $account->id());
+    }
+  }
+}

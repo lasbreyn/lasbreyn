@@ -1,0 +1,29 @@
+name: Rainbow
+type: theme
+base theme: classy
+description: 'A business template to elevate your business'
+package: Core
+# version: '8.0.x'
+# core: '8.x'
+stylesheets-remove:
+  - '@classy/css/layout.css'
+libraries:
+  - rainbow/global-styling
+ckeditor_stylesheets:
+  - css/base/elements.css
+  - css/components/captions.css
+  - css/components/table.css
+regions:
+  header: Header  
+  page: Page
+  breadcrumb: Breadcrumb
+  content: Content
+  sidebar_first: 'Sidebar first'
+  sidebar_second: 'Sidebar second'
+  footer: Footer
+
+# Information added by Drupal.org packaging script on 2015-11-25
+version: '8.x-1.1'
+core: '8.x'
+project: 'rainbow'
+datestamp: 1448433852

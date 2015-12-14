@@ -1,0 +1,91 @@
+<!-- CAROUSEL -->
+<div id="myCarousel" class="carousel slide">
+	<div class="carousel-inner">
+    {% for key, slider in slider_contents %}     
+      {% autoescape 'html' %}
+        {{ slider | raw }}
+      {% endautoescape %}
+    {% endfor %}
+	</div>
+	<a class="left carousel-control" href="#myCarousel" data-slide="prev">‹</a>
+	<a class="right carousel-control" href="#myCarousel" data-slide="next">›</a>
+</div>
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-7">
+      <h3 class="section-title"><span>Our company<span class="border"></span></span></h3>
+      <div class="row">
+        <div class="col-md-4">
+          <img src="themes/rainbow/flat-icons/col-img-4.jpg" alt="" class="img-responsive img-thumbnail">
+        </div>
+        <div class="col-md-8">
+          <p>
+            Lorem ipsum dolor sit amet, feugiat delicata liberavisse id cum, no quo maiorum intellegebat, liber regione eu sit. Mea cu case ludus integre, vide viderer eleifend ex mea. His at soluta regione diceret, cum et atqui placerat petentium.
+            <br>
+            Per amet nonumy periculis ei. Lorem ipsum dolor sit amet, feugiat delicata liberavisse id cum.
+          </p>
+        </div>
+      </div>
+      <blockquote class="blockquote-1">
+        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer posuere erat a ante. Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid</p>
+        <small>Someone famous in <cite title="Source Title">Source Title</cite></small>
+      </blockquote>
+    </div>
+    <div class="col-md-5">
+      <h3 class="section-title">Our expertise</h3>
+      <div class="widget">
+        <div class="panel-group" id="accordion">
+          <div class="panel panel-default">
+            <div class="panel-heading">
+              <h4 class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#collapseOne" class="collapsed">
+                  Web design
+                </a>
+              </h4>
+            </div>
+            <div id="collapseOne" class="panel-collapse collapse" style="height: 0px;">
+              <div class="panel-body">
+                <p>
+                  Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3 wolf moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum eiusmod. Brunch 3 wolf moon tempor, sunt aliqua put a bird on it squid single-origin coffee nulla assumenda shoreditch et. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident. Ad vegan excepteur butcher vice lomo.
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="panel panel-default">
+            <div class="panel-heading">
+              <h4 class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#collapseTwo" class="collapsed">
+                  Software development
+                </a>
+              </h4>
+            </div>
+            <div id="collapseTwo" class="panel-collapse collapse" style="height: 0px;">
+              <div class="panel-body">
+                <p>
+                  Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3 wolf moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum eiusmod. Brunch 3 wolf moon tempor, sunt aliqua put a bird on it squid single-origin coffee nulla assumenda shoreditch et. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident. Ad vegan excepteur butcher vice lomo.
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="panel panel-default">
+            <div class="panel-heading">
+              <h4 class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#collapseThree" class="">
+                  Search engine optimization
+                </a>
+              </h4>
+            </div>
+            <div id="collapseThree" class="panel-collapse in" style="height: auto;">
+              <div class="panel-body">
+                <p>
+                  Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3 wolf moon officia aute, non cupidatat skateboard dolor brunch.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
